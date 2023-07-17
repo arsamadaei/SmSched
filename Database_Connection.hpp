@@ -2,10 +2,12 @@
 #define DATABASE_CONNECTION_H
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <OpenXLSX/OpenXLSX.hpp>
 #include "date/date.h"
+#include "Htable/Htable.h"
 #include "projectStructure.hpp"
 
 using namespace std;
@@ -40,8 +42,8 @@ string cells[10] = {"Project Name",
 		   "Due Date" ,
 		   "Total Tasks" ,
 		   "Total Progress" ,
-		   "Participants" , 
 		   "Departments",
+		   "Participants" , 
 		   "Overdue",
 		   "Total_Projects: "};
 			    
@@ -64,7 +66,7 @@ void basic_if_not_exists() {
 	doc.save();
 	doc.close();
 		    
-	cout << "\nCREATED PROJECTS FILE: Projects.xlsx " << endl;
+	cout << "\n:::CREATED PROJECTS FILE: Projects.xlsx " << endl;
 	}
 }
 
@@ -94,13 +96,11 @@ void new_project(psl::Project* p) {
 	c.value() = p->total_tasks;
 
 	c = wks.cell("F" + to_string(num));
-	c.value() = p->total_tasks;
+	c.value() = p->total_progress;
 
 	c = wks.cell("G" + to_string(num));
-	c.value() = p->total_progress;
-	
-	c = wks.cell("H" + to_string(num));
 	c.value() = p->overdue;
+	
 
 	string participantsString;
 	for (const auto& participant : p->participants) {
@@ -116,13 +116,48 @@ void new_project(psl::Project* p) {
 	}
 	departmentsString = departmentsString.substr(0, departmentsString.length() - 2); // Remove the extra comma and space
 	c.value() = departmentsString;
-	c = wks.cell("J" + to_string(num));
+	c = wks.cell("H" + to_string(num));
 	// Continue setting values for other cells
-
+	
+	cout << ":::CREATED NEW PROJECT:\n" 
+		<< "\t|> Name: " << p->name << endl
+		<< "\t|> Description: " << p->description << endl
+		<< "\t|> bBegin date: " << p->begin_date << endl
+		<< "\t|> Due date: " << p->due_date << endl
+		<< "\t|> Total tasks: " << p->total_tasks << endl
+		<< "\t|> Overdue: " << p->overdue << endl
+		<< "\t|> Departments: " << departmentsString << endl
+		<< "\t|> Participants: " << participantsString << endl;
+	
 	doc.save();
 	doc.close();
 }
 
+
+exl::Htable< int, psl::Project > read_to_table() {
+	vector < psl::Project > project_list;
+	OpenXLSX::XLDocument doc;
+	doc.open("Projects.xlsx");
+	
+	auto wks = doc.workbook().worksheet("Projects");
+	OpenXLSX::XLCell c;
+	int num = wks.cell("K1").value().get<int>();\
+	cout << num;
+	exl::Htable< int, psl::Project > r(num);
+	
+	for (int i = 2; i <= num; i++) {
+		for (int e; e <= sizeof(n); e++) {
+			string name = n[e] + to_string(i);
+			cout << name;
+		} 	
+	}
+	return r;
+}
+
+
+// void backup_data() {}
+
+/*
 vector< psl::Project > list() {
 	vector < psl::Project > project_list;
 	OpenXLSX::XLDocument doc;
@@ -139,5 +174,6 @@ vector< psl::Project > list() {
 		} 	
 	}
 }
+*/
 
 #endif
